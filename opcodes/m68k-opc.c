@@ -258,6 +258,7 @@ const struct m68k_opcode m68k_opcodes[] =
 {"clrb", 2,	one(0041000),	one(0177700), "$s", m68000up | mcfisa_a },
 {"clrw", 2,	one(0041100),	one(0177700), "$s", m68000up | mcfisa_a },
 {"clrl", 2,	one(0041200),	one(0177700), "$s", m68000up | mcfisa_a },
+{"clrq", 2,     one(0127000),   one(0177700), "$s", m68080 },                                                     // APOLLO 68080
 
 {"cmp2b", 4,	two(0000300,0), two(0177700,07777), "!sR1", m68020up | cpu32 | fido_a },
 {"cmp2w", 4,	two(0001300,0),	two(0177700,07777), "!sR1", m68020up | cpu32 | fido_a },
@@ -272,7 +273,7 @@ const struct m68k_opcode m68k_opcodes[] =
 {"cmpiw", 4,	one(0006100),	one(0177700), "#w$s", m68000 | m68010 },
 {"cmpiw", 4,	one(0006100),	one(0177700), "#w@s", m68020up | cpu32 | fido_a },
 {"cmpiw", 4,	one(0006100),	one(0177700), "#wDs", mcfisa_b | mcfisa_c },
-{"cmpiwl",4,    one(0047000),   one(0177700), "#w@s", m68080 }, // 68080 APOLLO
+{"cmpiwl",4,    one(0047000),   one(0177700), "#w@s", m68080 },                                                   // 68080 APOLLO
 {"cmpil", 6,	one(0006200),	one(0177700), "#l$s", m68000 | m68010 },
 {"cmpil", 6,	one(0006200),	one(0177700), "#l@s", m68020up | cpu32 | fido_a },
 {"cmpil", 6,	one(0006200),	one(0177700), "#lDs", mcfisa_a },
