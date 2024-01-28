@@ -997,6 +997,8 @@ const struct m68k_opcode m68k_opcodes[] =
 {"fmovem", 4,	two(0xF000, 0xA000), two(0xF1C0, 0xE3FF), "IiL8~s", mfloat },
 {"fmovem", 4,	two(0xF000, 0x8000), two(0xF2C0, 0xE3FF), "Ii*sL8", mfloat },
 
+{"fmoverzl", 4, two(0xF000, 0x6001), two(0xF1C0, 0xFC7F), "IiF7$l", mfloat },  // APOLLO 68080
+
 {"fmulb", 4,	two(0xF000, 0x5823), two(0xF1C0, 0xFC7F), "Ii;bF7", mfloat },
 {"fmulb", 4,	two(0xF000, 0x5823), two(0xF1C0, 0xFC7F), "IibsF7", cfloat },
 {"fmuld", 4,	two(0xF000, 0x0023), two(0xF1C0, 0xE07F), "IiF8F7", cfloat },
