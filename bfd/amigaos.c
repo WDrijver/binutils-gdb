@@ -1274,7 +1274,7 @@ amiga_handle_cdb_hunk (
     case HUNK_DEBUG:
       /* handle .stab and .stabs as real sections. */
       if (current_name && (0 == strcmp (current_name, ".stab") || 0 == strcmp (current_name, ".stabstr")
-	  || 0 == strncmp (current_name, ".debug_", 7)))
+	  || 0 == strncmp (current_name, ".debug_", 7) || 0 == strcmp (current_name, ".dwarf")))
 	{
 	  secflags = SEC_HAS_CONTENTS;
 	  goto do_section;
@@ -1670,7 +1670,7 @@ amiga_write_object_contents (
 {
   long datadata_relocs=0,bss_size=0,idx;
   int *index_map,max_hunk=-1;
-  sec_ptr data_sec = 0, p, q, stab = 0, stabstr = 0;
+  sec_ptr data_sec = 0, p, q, stab = 0, stabstr = 0, dwarf = 0;
   unsigned long n[5];
 
   /* Distinguish UNITS, LOAD Files
@@ -1695,7 +1695,15 @@ amiga_write_object_contents (
 	  if (0 == strcmp (p->name, ".stabstr"))
 	    {
 	      stabstr = p;
-		  q->next = p->next;
+	      q->next = p->next;
+	      if (!p->next)
+	      break;
+	      continue;
+	    }
+	  if (0 == strcmp (p->name, ".dwarf"))
+	    {
+	      dwarf = p;
+	      q->next = p->next;
 	      if (!p->next)
 	      break;
 	      continue;
@@ -1703,20 +1711,26 @@ amiga_write_object_contents (
 	  q = p;
 	}
       // q points to last section - patch stab section and append
-      if (write_debug_hunk && stab && stabstr)
-	{
-	  unsigned total = 12 + stab->rawsize + stabstr->rawsize;
-	  unsigned char * data = (unsigned char *)bfd_alloc(abfd, total);
-	  bfd_putb32(ZMAGIC, data);
-	  bfd_putb32(stab->rawsize, data + 4);
-	  bfd_putb32(stabstr->rawsize, data + 8);
-	  memcpy(data + 12, stab->contents, stab->rawsize);
-	  memcpy(data + 12 + stab->rawsize, stabstr->contents, stabstr->rawsize);
-	  stab->rawsize = stab->size = total;
-	  stab->contents = data;
-	  q->next = stab;
-	  stab->next = 0;
-	}
+      if (write_debug_hunk) {
+	  if (stab && stabstr)
+	    {
+	      unsigned total = 12 + stab->rawsize + stabstr->rawsize;
+	      unsigned char * data = (unsigned char *)bfd_alloc(abfd, total);
+	      bfd_putb32(ZMAGIC, data);
+	      bfd_putb32(stab->rawsize, data + 4);
+	      bfd_putb32(stabstr->rawsize, data + 8);
+	      memcpy(data + 12, stab->contents, stab->rawsize);
+	      memcpy(data + 12 + stab->rawsize, stabstr->contents, stabstr->rawsize);
+	      stab->rawsize = stab->size = total;
+	      stab->contents = data;
+	      q->next = stab;
+	      stab->next = 0;
+	    }
+	  if (dwarf) {
+	    q->next = dwarf;
+	    dwarf->next = 0;
+	  }
+      }
       int nn = 0;
       for (p = abfd->sections; p != NULL; p = p->next)
 	p->index = nn++;
@@ -1748,7 +1762,7 @@ amiga_write_object_contents (
 	      && !(amiga_base_relative && !strcmp (p->name, ".bss")))
 	    {
 	      /* don't count debug sections. */
-	      if (strcmp (p->name, ".stab") && strncmp(p->name, ".debug_", 7))
+	      if (strcmp (p->name, ".stab") && strcmp(p->name, ".dwarf"))
 		n[2]++;
 	    }
 	else
@@ -1787,7 +1801,7 @@ amiga_write_object_contents (
 	    continue;
 
 	  /* don't add debug sections. */
-	  if (!strcmp (p->name, ".stab") || !strcmp (p->name, ".stabstr") || !strncmp(p->name, ".debug_", 7))
+	  if (!strcmp (p->name, ".stab") || !strcmp (p->name, ".stabstr") || !strcmp(p->name, ".dwarf"))
 	    continue;
 
 	  if (datadata_relocs && !strcmp(p->name,".text"))
@@ -2185,7 +2199,7 @@ amiga_write_section_contents (
       if (!write_longs (n, 1, abfd) || !write_name (abfd, section->name, 0))
 	return false;
     }
-  if (0 == strncmp(section->name, ".debug_", 7))
+  if (0 == strncmp(section->name, ".debug_", 7) || 0 == strcmp(section->name, ".dwarf"))
     section->flags = (section->flags & ~(SEC_CODE | SEC_DATA | SEC_ALLOC | SEC_LOAD)) | SEC_DEBUGGING;
 
   /* Depending on the type of the section, write out HUNK_{CODE|DATA|BSS} */
