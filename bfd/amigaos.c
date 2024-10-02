@@ -1729,6 +1729,7 @@ amiga_write_object_contents (
 	  if (dwarf) {
 	    q->next = dwarf;
 	    dwarf->next = 0;
+	    dwarf->reloc_count = 0; // poke away TODO: keep that information someday...
 	  }
       }
       int nn = 0;
