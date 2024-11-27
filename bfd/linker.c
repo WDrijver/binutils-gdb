@@ -2954,6 +2954,8 @@ _bfd_generic_section_already_linked (bfd *abfd ATTRIBUTE_UNUSED,
   struct bfd_section_already_linked *l;
   struct bfd_section_already_linked_hash_entry *already_linked_list;
 
+  static bfd * last_abfd;
+
   if ((sec->flags & SEC_LINK_ONCE) == 0)
     return false;
 
@@ -2976,8 +2978,23 @@ _bfd_generic_section_already_linked (bfd *abfd ATTRIBUTE_UNUSED,
 
   name = bfd_section_name (sec);
 
+  // amigaos uses this outside of linking
+  // ensure it get freed if objdumping archives!
+  if (last_abfd)
+    {
+      last_abfd = NULL;
+      if (_bfd_section_already_linked_table.size)
+	{
+	  bfd_section_already_linked_table_free();
+	  _bfd_section_already_linked_table.size = 0;
+	}
+    }
+  // open only once
   if (!_bfd_section_already_linked_table.size)
-    bfd_section_already_linked_table_init();
+    {
+      bfd_section_already_linked_table_init();
+      last_abfd = abfd;
+    }
 
   already_linked_list = bfd_section_already_linked_table_lookup (name);
 

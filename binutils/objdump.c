@@ -987,6 +987,21 @@ slurp_symtab (bfd *abfd)
   asymbol **sy = NULL;
   long storage;
 
+  // reset all stuff
+  syms = NULL;
+  symcount = 0;
+  sorted_syms = NULL;
+  sorted_symcount = 0;
+  lookup = NULL;
+  dynsyms = NULL;
+  synthsyms = NULL;
+  synthcount = 0;
+  dynsymcount = 0;
+  stabs = NULL;
+  stab_size = 0;
+  strtab = NULL;
+  stabstr_size = 0;
+
   if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
     {
       symcount = 0;
