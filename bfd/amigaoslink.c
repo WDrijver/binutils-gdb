@@ -599,7 +599,8 @@ get_relocated_section_contents (
             {
               libName = strdup(input_section->output_section->owner->filename);
               char * dot = strchr(libName, '.');
-              *dot = 0;
+              if (dot)
+        	*dot = 0;
             }
 	  gotValues = true;
 	}
