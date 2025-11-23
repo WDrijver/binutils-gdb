@@ -614,14 +614,14 @@ get_relocated_section_contents (
 	      if (0 == strcmp("___libName", asym->name))
 		{
 		  char * to = (char *)data + asym->value;
-		  strncpy(to, libName, 20); // leave room for .library
+		  strncpy(to, libName, 24); // leave room for .library
 		  strcat(to, ".library");
 		  int l = strlen(to);
 		  to += l + 1;
 		  time_t t = time(NULL);
 		  struct tm * tm = localtime(&t);
-		  snprintf(to, 40, "%s %d.%d (%d-%02d-%02d)", libName, major, minor,
-			   tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday);
+		  snprintf(to, 40, "%s %d.%d (%02d.%02d.%d)", libName, major, minor,
+			   tm->tm_mday, tm->tm_mon + 1, tm->tm_year + 1900);
 		  to += strlen(to) + 1;
 		  // insert an ID
 		  *to++ = 0x0b;
@@ -647,10 +647,10 @@ get_relocated_section_contents (
 	      if (0 == strcmp("___lib", asym->name))
 		{
 		  // 16, 18
-		  data[asym->value + 16] = major >> 8;
-		  data[asym->value + 17] = major;
-		  data[asym->value + 18] = minor >> 8;
-		  data[asym->value + 19] = minor;
+		  data[asym->value + 20] = major >> 8;
+		  data[asym->value + 21] = major;
+		  data[asym->value + 22] = minor >> 8;
+		  data[asym->value + 23] = minor;
 		}
             }
 	  dataDone = true;
