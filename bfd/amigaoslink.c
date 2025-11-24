@@ -914,6 +914,7 @@ amiga_perform_reloc (
     {
     case H_ABS16:
     case H_ABS32:
+AbsReloc:
       if (hard_reloc)
 	relocation= sym->value + target_section->output_offset + target_section->output_section->vma;
       else if (bfd_is_abs_section(target_section)) /* Ref to absolute hunk */
@@ -954,6 +955,21 @@ amiga_perform_reloc (
 	}
       else if (sec->output_section!=target_section->output_section) /* Error */
 	{
+	  // convert to absolute jmp/jsr and change reloc type
+	  if (r->howto->type == H_PC32) {
+	      uint16_t opcode = bfd_get_16(sec->owner, data + r->address - 2);
+	      if (opcode == 0x60FF) { // BRA.L
+	          bfd_put_16(sec->owner, 0x4EF9, data + r->address - 2);
+	          r->howto= &howto_table[0];
+	          goto AbsReloc;
+	      }
+	      if (opcode == 0x61FF) { // BSR.L
+	          bfd_put_16(sec->owner, 0x4EB9, data + r->address - 2);
+	          r->howto= &howto_table[0];
+	          goto AbsReloc;
+	      }
+	  }
+
 	  DPRINT(5,("pc relative, but out-of-range\n"));
 	  ret=bfd_reloc_outofrange;
 	}
